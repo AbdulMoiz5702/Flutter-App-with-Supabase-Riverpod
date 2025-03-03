@@ -17,6 +17,14 @@ final resetProvider = StateNotifierProvider<ResetNotifier , LoadingState>((red){
 
 class ResetNotifier extends StateNotifier<LoadingState>{
 
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    updatePasswordController.dispose();
+    updateEmailController.dispose();
+  }
+
   ResetNotifier() :super(LoadingState(isLoading: false));
 
    TextEditingController updatePasswordController = TextEditingController();

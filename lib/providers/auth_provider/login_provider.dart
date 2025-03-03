@@ -58,9 +58,10 @@ class LoginNotifier extends StateNotifier<LoginState>{
       await supaBase.auth.resetPasswordForEmail(
           emailController.text
       ).timeout(const Duration(seconds: 5));
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>  VerifyOtp(email:emailController.text.toString(),magicLink: true,updatePassword: true,)));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>  VerifyOtp(email:emailController.text.toString(),magicLink: true,updatePassword: true,))).then((value){
+        emailController.clear();
+      });
       state = state.copyWith(forgotLoading: false);
-      emailController.clear();
     } on TimeoutException {
       state = state.copyWith(forgotLoading: false);
     } on SocketException {
