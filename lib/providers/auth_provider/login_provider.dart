@@ -8,8 +8,6 @@ import 'package:ripverpod_supabase/views/screens/auth_screens/verify_otp.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:supabase/supabase.dart';
 
-import '../../services/loading_state.dart';
-
 
 
 final loginProvider = StateNotifierProvider<LoginNotifier,LoginState>((ref){
@@ -38,7 +36,7 @@ class LoginNotifier extends StateNotifier<LoginState>{
       ).timeout(const Duration(seconds: 5));
       state = state.copyWith(isLoading: false);
       // ignore: use_build_context_synchronously
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> HomeScreen())).then((value){
+       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> HomeScreen())).then((value){
         passwordController.clear();
         emailController.clear();
       });
@@ -47,6 +45,7 @@ class LoginNotifier extends StateNotifier<LoginState>{
     } on SocketException {
       state = state.copyWith(isLoading: false);
     }catch(error){
+      print(error);
       state = state.copyWith(isLoading: false);
       rethrow;
     }
@@ -58,7 +57,7 @@ class LoginNotifier extends StateNotifier<LoginState>{
       await supaBase.auth.resetPasswordForEmail(
           emailController.text
       ).timeout(const Duration(seconds: 5));
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>  VerifyOtp(email:emailController.text.toString(),magicLink: true,updatePassword: true,))).then((value){
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>  VerifyOtp(email:emailController.text.toString(),isLogin: true,otpType: OtpType.recovery,))).then((value){
         emailController.clear();
       });
       state = state.copyWith(forgotLoading: false);
@@ -79,7 +78,7 @@ class LoginNotifier extends StateNotifier<LoginState>{
           email: supaBase.auth.currentUser!.email,
           shouldCreateUser: false,
       ).timeout(const Duration(seconds: 5));
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>  VerifyOtp(email:supaBase.auth.currentUser!.email.toString(),magicLink: true,updatePassword: false,)));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>  VerifyOtp(email:supaBase.auth.currentUser!.email.toString(),otpType: OtpType.magiclink,isLogin: true,)));
       state = state.copyWith(otpLoading: false);
     } on TimeoutException {
       state = state.copyWith(otpLoading: false);

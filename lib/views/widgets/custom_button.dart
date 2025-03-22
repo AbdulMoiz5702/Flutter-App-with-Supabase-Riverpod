@@ -14,7 +14,7 @@ class CustomButton extends StatelessWidget {
   final Color color ;
   final double fontSize;
   final FontWeight fontWeight ;
-  const CustomButton({super.key,required this.title,required this.onTap,this.height = 0.06,this.width = 1,this.color = blackColor,this.fontSize = 16.0,this.fontWeight = FontWeight.w700});
+  const CustomButton({super.key,required this.title,required this.onTap,this.height = 0.06,this.width = 1,this.color = AppColor.blackColor,this.fontSize = 16.0,this.fontWeight = FontWeight.w700});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,7 @@ class CustomButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(30),
           color: color,
         ),
-        child: mediumText(title: title,context: context,fontSize: fontSize.toDouble(),color: whiteColor,fontWeight:fontWeight ),
+        child: mediumText(title: title,context: context,fontSize: fontSize.toDouble(),color: AppColor.whiteColor,fontWeight:fontWeight ),
       ),
     );
   }

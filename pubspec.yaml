@@ -42,6 +42,7 @@ dependencies:
   riverpod:
   flutter_riverpod:
   flutter_otp_text_field:
+  google_sign_in:
 
 dev_dependencies:
   flutter_test:

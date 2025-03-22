@@ -1,11 +1,11 @@
 
 
 
-class LoadingState {
+class GenericLoadingState {
   final bool isLoading ;
-  LoadingState({required this.isLoading});
+  GenericLoadingState({required this.isLoading});
 
-  LoadingState copyWith({String ? phone ,String ? password, bool ? isLoading}){
-    return LoadingState(isLoading: isLoading ?? this.isLoading);
+  GenericLoadingState copyWith({bool ? isLoading}){
+    return GenericLoadingState(isLoading: isLoading ?? this.isLoading);
   }
 }

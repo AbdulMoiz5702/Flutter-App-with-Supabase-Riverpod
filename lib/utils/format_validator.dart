@@ -15,7 +15,6 @@ class FormValidators {
     return null;
   }
 
-  // Password Validation (8+ chars, 1 uppercase, 1 special char)
   static String? validatePassword(String? value) {
     if (value == null || value.isEmpty) return "Password is required";
     if (value.length < 8) return "Password must be at least 8 characters";
@@ -24,10 +23,33 @@ class FormValidators {
     return null;
   }
 
-  // Confirm Password Validation
+
   static String? validateConfirmPassword(String? value, String password) {
     if (value == null || value.isEmpty) return "Please confirm your password";
     if (value != password) return "Passwords do not match";
     return null;
+  }
+
+
+
+
+  static bool hasMinLength(String password) {
+    return password.length >= 8;
+  }
+
+  static bool hasUpperCase(String password) {
+    return RegExp(r'(?=.*[A-Z])').hasMatch(password);
+  }
+
+  static bool hasSpecialChar(String password) {
+    return RegExp(r'(?=.*[!@#$%^&*(),.?":{}|<>])').hasMatch(password);
+  }
+
+  static int strength(String password) {
+    int count = 0;
+    if (password.length >= 8) count++;
+    if (RegExp(r'(?=.*[A-Z])').hasMatch(password)) count++;
+    if (RegExp(r'(?=.*[!@#$%^&*(),.?":{}|<>])').hasMatch(password)) count++;
+    return count;
   }
 }

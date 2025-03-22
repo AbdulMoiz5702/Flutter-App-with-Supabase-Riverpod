@@ -10,12 +10,12 @@ import 'package:ripverpod_supabase/views/screens/auth_screens/login_screen.dart'
 import 'package:supabase/supabase.dart';
 
 
-final resetProvider = StateNotifierProvider<ResetNotifier , LoadingState>((red){
+final resetProvider = StateNotifierProvider<ResetNotifier , GenericLoadingState>((red){
   return ResetNotifier();
 });
 
 
-class ResetNotifier extends StateNotifier<LoadingState>{
+class ResetNotifier extends StateNotifier<GenericLoadingState>{
 
   @override
   void dispose() {
@@ -25,7 +25,7 @@ class ResetNotifier extends StateNotifier<LoadingState>{
     updateEmailController.dispose();
   }
 
-  ResetNotifier() :super(LoadingState(isLoading: false));
+  ResetNotifier() :super(GenericLoadingState(isLoading: false));
 
    TextEditingController updatePasswordController = TextEditingController();
    TextEditingController updateEmailController = TextEditingController();

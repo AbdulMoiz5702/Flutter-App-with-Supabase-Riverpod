@@ -3,37 +3,71 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ripverpod_supabase/conts/supabase_consts.dart';
+import 'package:ripverpod_supabase/core/user_model.dart';
 import 'package:ripverpod_supabase/views/home/home_screen.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:supabase/supabase.dart';
-
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../views/screens/auth_screens/update_password.dart';
 
 
 
 final otpProvider = StateNotifierProvider<VerifyNotifier,VerifyState>((ref){
-  return VerifyNotifier();
+  return VerifyNotifier(ref);
 });
 
 class VerifyNotifier extends StateNotifier<VerifyState> {
-  VerifyNotifier() : super(VerifyState(isLoading: false, resendLoading: false, secondsRemaining: 0,forgotLoading: false));
+  final Ref ref;
+  VerifyNotifier(this.ref) : super(VerifyState(isLoading: false, resendLoading: false, secondsRemaining: 0,forgotLoading: false));
+
 
 
   TextEditingController otpController = TextEditingController();
   Timer? _timer;
-  Future<void> confirmOtp({required String email, required BuildContext context,required bool magicLink,required bool updatePassword}) async {
+  Future<void> confirmOtp({
+    required String email,
+    required BuildContext context,
+    required OtpType otpType,
+  }) async {
     try {
-      print('email : ${email}');
+      print('Email: $email');
       state = state.copyWith(isLoading: true);
+
       await supaBase.auth.verifyOTP(
         email: email,
         token: otpController.text.trim(),
-        type: magicLink == false ? OtpType.signup : OtpType.magiclink,
+        type: otpType, // Directly pass the OTP type
       ).timeout(const Duration(seconds: 5));
-      if(updatePassword == true){
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const UpdatePassword()));
-      }else{
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+
+      // Handle navigation based on OTP type
+      switch (otpType) {
+        case OtpType.signup:
+          saveUserData().then((value){
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+          });
+          break;
+        case OtpType.magiclink:
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+          break;
+        case OtpType.recovery:
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (context) => const UpdatePassword()));
+          break;
+
+        case OtpType.emailChange:
+          // Navigator.pushReplacement(
+          //     context, MaterialPageRoute(builder: (context) => const EmailChangeScreen()));
+          break;
+
+        case OtpType.phoneChange:
+          // Navigator.pushReplacement(
+          //     context, MaterialPageRoute(builder: (context) => const PhoneChangeScreen()));
+          break;
+
+        default:
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (context) => const HomeScreen()));
       }
       otpController.clear();
       state = state.copyWith(isLoading: false);
@@ -46,13 +80,14 @@ class VerifyNotifier extends StateNotifier<VerifyState> {
       rethrow;
     }
   }
-  Future<void> resendOtp({required String email, required BuildContext context}) async {
+
+  Future<void> resendOtp({required String email, required BuildContext context,required OtpType otpType}) async {
     if (state.secondsRemaining > 0) return;
     try {
       state = state.copyWith(resendLoading: true);
       await supaBase.auth.resend(
         email: email,
-        type: OtpType.signup,
+        type: otpType,
       ).timeout(const Duration(seconds: 5));
       otpController.clear();
       startTimer();
@@ -81,6 +116,24 @@ class VerifyNotifier extends StateNotifier<VerifyState> {
         timer.cancel();
       }
     });
+  }
+
+  Future<void> saveUserData ()async{
+    try{
+      var userData = UserModel(
+        id:id,
+        name:name,
+        email:email,
+        phone:phone,
+        address: 'test',
+      );
+      var data = supaBase.from(userTable);
+      await data.insert(userData).select();
+    }catch(e){
+      print(e);
+      state = state.copyWith(isLoading: false);
+      rethrow;
+    }
   }
 
   @override

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ripverpod_supabase/views/screens/auth_screens/signup_screen.dart';
+import 'package:ripverpod_supabase/views/splash/splash_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'conts/supabase_consts.dart';
 
@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: const SignupScreen(),
+        home: const SplashScreen(),
       ),
     );
   }

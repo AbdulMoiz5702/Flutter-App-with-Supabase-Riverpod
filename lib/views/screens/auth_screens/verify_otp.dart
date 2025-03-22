@@ -6,6 +6,7 @@ import 'package:ripverpod_supabase/conts/colors.dart';
 import 'package:ripverpod_supabase/views/widgets/custom_button.dart';
 import 'package:ripverpod_supabase/views/widgets/custom_sizedBox.dart';
 import 'package:ripverpod_supabase/views/widgets/text_widgets.dart';
+import 'package:supabase/supabase.dart';
 import '../../../providers/auth_provider/otp_provider.dart';
 import '../../widgets/custom_loading.dart';
 
@@ -13,9 +14,9 @@ import '../../widgets/custom_loading.dart';
 
 class VerifyOtp extends ConsumerWidget {
   final String email;
-  final bool magicLink ;
-  final bool updatePassword;
-  const VerifyOtp({super.key,required this.email,required this.magicLink,required this.updatePassword});
+  final OtpType otpType ;
+  final bool isLogin;
+  const VerifyOtp({super.key,required this.email,required this.otpType,required this.isLogin});
 
   @override
   Widget build(BuildContext context,WidgetRef ref) {
@@ -36,13 +37,13 @@ class VerifyOtp extends ConsumerWidget {
               const Sized(height: 0.3,),
               OtpTextField(
                 numberOfFields: 6,
-                borderColor: blackColor.withOpacity(0.5),
-                focusedBorderColor: blackColor,
+                borderColor: AppColor.blackColor.withOpacity(0.5),
+                focusedBorderColor: AppColor.blackColor,
                 styles:List.generate(6, (index) => GoogleFonts.specialElite(
                 textStyle: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: blackColor,
+                  color: AppColor.blackColor,
                 ),
               )),
                 showFieldAsBox: false,
@@ -58,9 +59,9 @@ class VerifyOtp extends ConsumerWidget {
               Consumer(
                   builder: (context,reference,_){
                     var data = reference.watch(otpProvider.select((state)=> state.isLoading));
-                    return data == true ? const CustomLoading() : CustomButton(title:magicLink == true ? 'Login' :'Signup', onTap: (){
+                    return data == true ? const CustomLoading() : CustomButton(title:isLogin == true ? 'Login' :'Signup', onTap: (){
                       if(key.currentState!.validate()){
-                        reference.read(otpProvider.notifier).confirmOtp(email: email, context: context,magicLink: magicLink,updatePassword: updatePassword);
+                        reference.read(otpProvider.notifier).confirmOtp(email: email, context: context,otpType:otpType,);
                       }
                     });
                   }),
@@ -68,7 +69,7 @@ class VerifyOtp extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  smallText(title: "Haven't received your OTP?",color: blackColor),
+                  smallText(title: "Haven't received your OTP?",color: AppColor.blackColor),
                   const Sized(width: 0.02,),
                   Consumer(
                     builder: (context, reference, _) {
@@ -77,7 +78,7 @@ class VerifyOtp extends ConsumerWidget {
                           ? Text("Resend in ${data.secondsRemaining}s")  // Show countdown
                           : data.resendLoading == true ? const CustomLoading() :InkWell(
                         onTap: () {
-                          reference.read(otpProvider.notifier).resendOtp(email: email, context: context);
+                          reference.read(otpProvider.notifier).resendOtp(email: email, context: context,otpType: otpType);
                         },
                         child: mediumText(title: 'Resend'),
                       );
