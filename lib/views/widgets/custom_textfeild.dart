@@ -11,20 +11,23 @@ class CustomTextField extends StatelessWidget {
   final bool obscureText;
   final FormFieldValidator validate;
   final bool isDense ;
+  final int maxLine ;
   final Function(String) ? onChanged ;
   const CustomTextField(
-      {required this.controller,
+      {super.key, required this.controller,
       required this.hintText,
       this.keyboardType = TextInputType.text,
       required this.validate,
          this.obscureText = false ,
         this.isDense =false,
         this.onChanged,
+        this.maxLine = 1
       });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      maxLines: maxLine,
       onChanged: onChanged,
       obscuringCharacter: '*',
       obscureText: obscureText,

@@ -1,13 +1,17 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:ripverpod_supabase/conts/supabase_consts.dart';
-import 'package:ripverpod_supabase/core/user_model.dart';
+import 'package:ripverpod_supabase/core/models/user_model/user_model.dart';
+import 'package:ripverpod_supabase/services/net_work_excptions.dart';
+import 'package:ripverpod_supabase/services/supaBase_services.dart';
 import 'package:ripverpod_supabase/views/home/home_screen.dart';
+import 'package:ripverpod_supabase/views/screens/auth_screens/forgot_password.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:supabase/supabase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../views/bottom_nav/bottom_nav_screen.dart';
 import '../../views/screens/auth_screens/update_password.dart';
 
 
@@ -20,62 +24,69 @@ class VerifyNotifier extends StateNotifier<VerifyState> {
   final Ref ref;
   VerifyNotifier(this.ref) : super(VerifyState(isLoading: false, resendLoading: false, secondsRemaining: 0,forgotLoading: false));
 
-
-
   TextEditingController otpController = TextEditingController();
   Timer? _timer;
+
+  String getTitle(OtpType otp) {
+    switch (otp) {
+      case OtpType.signup:
+        return 'Signup';
+      case OtpType.magiclink:
+        return 'Login';
+      case OtpType.emailChange:
+        return 'Confirm Email';
+      case OtpType.recovery:
+        return 'Confirm Password';
+      case OtpType.phoneChange:
+        return 'Confirm Phone';
+      default:
+        return 'Confirm'; // Just in case, though it's not needed for bool
+    }
+  }
+
+
+
   Future<void> confirmOtp({
     required String email,
     required BuildContext context,
     required OtpType otpType,
   }) async {
     try {
-      print('Email: $email');
       state = state.copyWith(isLoading: true);
-
       await supaBase.auth.verifyOTP(
         email: email,
         token: otpController.text.trim(),
-        type: otpType, // Directly pass the OTP type
+        type: otpType,
       ).timeout(const Duration(seconds: 5));
-
-      // Handle navigation based on OTP type
       switch (otpType) {
         case OtpType.signup:
-          saveUserData().then((value){
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+          saveUserData(context: context).then((value){
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const BottomNavScreen()));
           });
           break;
         case OtpType.magiclink:
           Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+              context, MaterialPageRoute(builder: (context) => const BottomNavScreen()));
           break;
         case OtpType.recovery:
-          Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => const UpdatePassword()));
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const ForgotPassword()));
           break;
-
         case OtpType.emailChange:
-          // Navigator.pushReplacement(
-          //     context, MaterialPageRoute(builder: (context) => const EmailChangeScreen()));
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const BottomNavScreen())).then((v) async {
+            updateEmail(context: context,newEmail: email);
+          });
           break;
-
-        case OtpType.phoneChange:
-          // Navigator.pushReplacement(
-          //     context, MaterialPageRoute(builder: (context) => const PhoneChangeScreen()));
+        case OtpType.email:
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const UpdatePassword()));
           break;
-
         default:
           Navigator.pushReplacement(
               context, MaterialPageRoute(builder: (context) => const HomeScreen()));
       }
       otpController.clear();
       state = state.copyWith(isLoading: false);
-    } on TimeoutException {
-      state = state.copyWith(isLoading: false);
-    } on SocketException {
-      state = state.copyWith(isLoading: false);
     } catch (error) {
+      ExceptionHandler.handle(error, context);
       state = state.copyWith(isLoading: false);
       rethrow;
     }
@@ -92,19 +103,12 @@ class VerifyNotifier extends StateNotifier<VerifyState> {
       otpController.clear();
       startTimer();
       state = state.copyWith(resendLoading: false);
-    } on TimeoutException {
-      state = state.copyWith(resendLoading: false);
-    } on SocketException {
-      state = state.copyWith(resendLoading: false);
     } catch (error) {
+      ExceptionHandler.handle(error, context);
       state = state.copyWith(resendLoading: false);
       rethrow;
     }
   }
-
-
-
-
 
   void startTimer() {
     state = state.copyWith(secondsRemaining: 60);
@@ -118,20 +122,34 @@ class VerifyNotifier extends StateNotifier<VerifyState> {
     });
   }
 
-  Future<void> saveUserData ()async{
-    try{
+  Future<void> saveUserData({required BuildContext context}) async {
+    try {
       var userData = UserModel(
-        id:id,
-        name:name,
-        email:email,
-        phone:phone,
-        address: 'test',
+        id: id,
+        name: name,
+        email: email,
+        userName: userName,
+        phone: '',
+        address: '',
+        bio: '',
+        imageUrl: '',
+        isProfileCompleted: false,
+        profilePoints: 35,
       );
-      var data = supaBase.from(userTable);
-      await data.insert(userData).select();
-    }catch(e){
-      print(e);
+      await SupaBaseServices.insertData<Map<String, dynamic>>(tableName: userTable, data: userData.toJson(),
+          context: context
+      );
+    } catch (e) {
       state = state.copyWith(isLoading: false);
+      rethrow;
+    }
+  }
+
+
+  Future<void> updateEmail ({required BuildContext context,required String newEmail})async{
+    try{
+      SupaBaseServices.updateData(tableName: userTable, updatedData: {'email': newEmail}, column: 'user_id', value: supaBase.auth.currentUser!.id, context: context);
+    }catch(e){
       rethrow;
     }
   }

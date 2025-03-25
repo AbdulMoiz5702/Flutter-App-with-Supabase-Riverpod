@@ -14,5 +14,5 @@ const String userTable = 'all_users';
  String name = '';
  String id = '';
  String email = '';
- String phone = '';
+ String userName = '';
 

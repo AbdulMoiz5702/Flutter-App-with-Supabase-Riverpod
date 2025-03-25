@@ -3,7 +3,8 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ripverpod_supabase/conts/supabase_consts.dart';
-import 'package:ripverpod_supabase/views/home/home_screen.dart';
+import 'package:ripverpod_supabase/services/net_work_excptions.dart';
+import 'package:ripverpod_supabase/views/bottom_nav/bottom_nav_screen.dart';
 import 'package:ripverpod_supabase/views/screens/auth_screens/verify_otp.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:supabase/supabase.dart';
@@ -18,12 +19,13 @@ class LoginNotifier extends StateNotifier<LoginState>{
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     passwordController.dispose();
     emailController.dispose();
   }
   LoginNotifier():super(LoginState(isLoading: false,forgotLoading: false,otpLoading: false));
+
+
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
@@ -36,17 +38,13 @@ class LoginNotifier extends StateNotifier<LoginState>{
       ).timeout(const Duration(seconds: 5));
       state = state.copyWith(isLoading: false);
       // ignore: use_build_context_synchronously
-       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> HomeScreen())).then((value){
+       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> BottomNavScreen())).then((value){
         passwordController.clear();
         emailController.clear();
       });
-    }on TimeoutException{
-      state = state.copyWith(isLoading: false);
-    } on SocketException {
-      state = state.copyWith(isLoading: false);
     }catch(error){
-      print(error);
       state = state.copyWith(isLoading: false);
+      ExceptionHandler.handle(error, context);
       rethrow;
     }
   }
@@ -55,18 +53,15 @@ class LoginNotifier extends StateNotifier<LoginState>{
     try {
       state = state.copyWith(forgotLoading: true);
       await supaBase.auth.resetPasswordForEmail(
-          emailController.text
+          emailController.text,
       ).timeout(const Duration(seconds: 5));
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>  VerifyOtp(email:emailController.text.toString(),isLogin: true,otpType: OtpType.recovery,))).then((value){
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>  VerifyOtp(email:emailController.text.toString(),otpType: OtpType.recovery,))).then((value){
         emailController.clear();
       });
       state = state.copyWith(forgotLoading: false);
-    } on TimeoutException {
+    }catch (error) {
       state = state.copyWith(forgotLoading: false);
-    } on SocketException {
-      state = state.copyWith(forgotLoading: false);
-    } catch (error) {
-      state = state.copyWith(forgotLoading: false);
+      ExceptionHandler.handle(error, context);
       rethrow;
     }
   }
@@ -78,14 +73,11 @@ class LoginNotifier extends StateNotifier<LoginState>{
           email: supaBase.auth.currentUser!.email,
           shouldCreateUser: false,
       ).timeout(const Duration(seconds: 5));
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>  VerifyOtp(email:supaBase.auth.currentUser!.email.toString(),otpType: OtpType.magiclink,isLogin: true,)));
-      state = state.copyWith(otpLoading: false);
-    } on TimeoutException {
-      state = state.copyWith(otpLoading: false);
-    } on SocketException {
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>  VerifyOtp(email:supaBase.auth.currentUser!.email.toString(),otpType: OtpType.magiclink,)));
       state = state.copyWith(otpLoading: false);
     } catch (error) {
       state = state.copyWith(otpLoading: false);
+      ExceptionHandler.handle(error, context);
       rethrow;
     }
   }

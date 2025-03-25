@@ -1,9 +1,8 @@
 
 import 'dart:io';
 import 'dart:async';
-
+import 'package:flutter/material.dart';
 import 'package:ripverpod_supabase/utils/snack_bar.dart';
-
 import 'app_exceptions.dart';
 
 
@@ -28,19 +27,24 @@ class UnknownException extends AppException {
 
 
 class ExceptionHandler {
-  static AppException handle(dynamic error,context) {
+
+  static void handle(dynamic error, context) {
+    String errorMessage = getMessage(error);
+    debugPrint("⚠️ Exception Caught: $errorMessage");
+    SnackBarClass.errorSnackBar(context: context, message: errorMessage);
+  }
+
+  static String getMessage(dynamic error) {
     if (error is TimeoutException) {
-      SnackBarClass.errorSnackBar(context: context, message: '⏳ Request timeout. Please try again later.');
-      return TimeoutExceptionCustom();
-    } else if (error is SocketException) {
-      SnackBarClass.errorSnackBar(context: context, message: '🌐 No internet connection. Please check your network.');
-      return NoInternetException();
+      return TimeoutExceptionCustom().message;
+    } else if (error is SocketException || error.toString().contains('SocketException')) {
+      return NoInternetException().message;
     } else if (error is HttpException) {
-      SnackBarClass.errorSnackBar(context: context, message: '❌ Server error. Please try again later.');
-      return ServerException();
+      return ServerException().message;
     } else {
-      SnackBarClass.errorSnackBar(context: context, message: '❌ Unexpected error: $error');
-      return UnknownException(error);
+      return UnknownException(error).message;
     }
   }
 }
+
+

@@ -14,7 +14,7 @@ class SnackBarClass {
       SnackBar(
         hitTestBehavior: HitTestBehavior.deferToChild,
         content: smallText(title: message,color: AppColor.whiteColor),
-        backgroundColor: AppColor.blackColor,
+        backgroundColor: AppColor.successColor,
         duration: const Duration(seconds: 5),
         elevation: 10,
         shape: RoundedRectangleBorder(
@@ -23,13 +23,13 @@ class SnackBarClass {
         behavior: SnackBarBehavior.floating,
         margin:  const  EdgeInsets.all(10),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        action: SnackBarAction(
-          label: "UNDO",
-          textColor: Colors.white,
-          onPressed: () {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          },
-        ),
+        // action: SnackBarAction(
+        //   label: "UNDO",
+        //   textColor: Colors.white,
+        //   onPressed: () {
+        //     ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        //   },
+        // ),
         dismissDirection: DismissDirection.horizontal,
         onVisible: () {
         },
@@ -53,13 +53,6 @@ class SnackBarClass {
         behavior: SnackBarBehavior.floating,
         margin:  const  EdgeInsets.all(10),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        action: SnackBarAction(
-          label: "UNDO",
-          textColor: Colors.white,
-          onPressed: () {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          },
-        ),
         dismissDirection: DismissDirection.horizontal,
         onVisible: () {
         },
@@ -83,13 +76,6 @@ class SnackBarClass {
         behavior: SnackBarBehavior.floating,
         margin:  const  EdgeInsets.all(10),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        action: SnackBarAction(
-          label: "UNDO",
-          textColor: Colors.white,
-          onPressed: () {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          },
-        ),
         dismissDirection: DismissDirection.horizontal,
         onVisible: () {
         },

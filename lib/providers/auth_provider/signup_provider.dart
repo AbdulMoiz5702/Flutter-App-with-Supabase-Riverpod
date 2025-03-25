@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:ripverpod_supabase/conts/supabase_consts.dart';
 import 'package:ripverpod_supabase/services/net_work_excptions.dart';
+import 'package:ripverpod_supabase/services/supaBase_services.dart';
 import 'package:ripverpod_supabase/views/screens/auth_screens/verify_otp.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:supabase/supabase.dart';
@@ -23,18 +25,34 @@ class SignupNotifier extends StateNotifier<SignupState>{
     emailController.dispose();
     confirmPassword.dispose();
     nameController.dispose();
-    passwordController.dispose();
+    userNameSubscription?.cancel();
+    userNameController.dispose();
   }
-  SignupNotifier():super(SignupState(isLoading: false,password: ''));
+  SignupNotifier():super(SignupState(isLoading: false,password: '',checkUserName: false));
+
   TextEditingController emailController = TextEditingController();
   TextEditingController nameController = TextEditingController();
-  TextEditingController phoneController = TextEditingController();
+  TextEditingController userNameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPassword = TextEditingController();
+  StreamSubscription<List<Map<String, dynamic>>>? userNameSubscription;
+
 
   updatePasswordStrength(){
     state = state.copyWith(password: passwordController.text);
   }
+
+  void checkUserNameAvailability({required BuildContext context}) {
+    userNameSubscription?.cancel();
+    String currentUserName = userNameController.text.trim();
+    userNameSubscription = SupaBaseServices.getUserNameStream(userName: currentUserName).listen((data) {
+      bool isAvailable = data.isEmpty;
+      state = state.copyWith(checkUserName: isAvailable);
+    },onError: (error) {
+     ExceptionHandler.handle(error, context);
+    });
+  }
+
 
 
   Future<void> signupUser({required BuildContext context})async{
@@ -45,12 +63,12 @@ class SignupNotifier extends StateNotifier<SignupState>{
         password: passwordController.text,
       ).then((value) {
         name = nameController.text.trim();
-        phone = phoneController.text.trim();
+        userName = userNameController.text.trim();
         email = emailController.text.trim();
         id = value.user!.id ;
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> VerifyOtp(email: emailController.text.trim(),otpType: OtpType.signup,isLogin: false,))).then((value){
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> VerifyOtp(email: emailController.text.trim(),otpType: OtpType.signup,))).then((value){
           emailController.clear();
-          phoneController.clear();
+          userNameController.clear();
           passwordController.clear();
           confirmPassword.clear();
           nameController.clear();
@@ -70,10 +88,11 @@ class SignupNotifier extends StateNotifier<SignupState>{
 class SignupState {
   final bool isLoading ;
   final String password ;
-  SignupState({required this.isLoading,required this.password});
+  final bool checkUserName;
+  SignupState({required this.isLoading,required this.password,required this.checkUserName,});
 
-  SignupState copyWith({bool ? isLoading,String ? password}){
-    return SignupState(isLoading: isLoading ?? this.isLoading,password: password ?? this.password);
+  SignupState copyWith({bool ? isLoading,String ? password,bool ? checkUserName}){
+    return SignupState(isLoading: isLoading ?? this.isLoading,password: password ?? this.password,checkUserName: checkUserName ?? this.checkUserName);
   }
 }
 

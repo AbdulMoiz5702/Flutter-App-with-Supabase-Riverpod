@@ -1,6 +1,3 @@
-
-
-
 import 'package:flutter/material.dart';
 
 class AppColor {
@@ -10,4 +7,5 @@ class AppColor {
  static const Color warningColor = Colors.deepOrange;
  static const Color successColor = Colors.green;
  static Color disableColor = Colors.grey.shade300;
+ static Color secondaryColor = Colors.blue;
 }

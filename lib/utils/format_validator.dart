@@ -30,6 +30,26 @@ class FormValidators {
     return null;
   }
 
+  static String? validateNormalField(String? value, String title) {
+    if (value == null || value.isEmpty) return "$title required";
+    return null;
+  }
+
+  // Username Validation
+  static String? validateUserName(String? value, bool checkUserName) {
+    if (value == null || value.isEmpty) {
+      return 'Username required';
+    } else if (value.contains(' ')) {
+      return 'Username cannot contain spaces';
+    } else if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value)) {
+      return 'Only letters, numbers, and underscores allowed';
+    } else if (checkUserName == false) {
+      return 'Username is already taken';
+    } else {
+      return null;
+    }
+  }
+
 
 
 

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ripverpod_supabase/conts/supabase_consts.dart';
+import 'package:ripverpod_supabase/views/bottom_nav/bottom_nav_screen.dart';
 import 'package:ripverpod_supabase/views/home/home_screen.dart';
 import 'package:ripverpod_supabase/views/screens/auth_screens/signup_screen.dart';
 
@@ -16,7 +17,7 @@ class SplashNotifier {
   Future<void> checkUserStatus({required BuildContext context})async{
     if(supaBase.auth.currentUser != null){
       print('userId : ${supaBase.auth.currentUser!.id}');
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> const UserProfileScreen()));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> const BottomNavScreen()));
     }else{
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> const SignupScreen()));
     }

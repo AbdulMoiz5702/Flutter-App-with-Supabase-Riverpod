@@ -11,36 +11,45 @@ class SupaBaseServices {
 
 
   static getUserData({required String userId}){
-    return supaBase.from(userTable).stream(primaryKey: ['user_id'])   ;//select('user_id,email,phone,name');
+    return supaBase.from(userTable).stream(primaryKey: ['user_id']);
+  }
+
+  static  getUserNameStream({required String userName}) {
+    return supaBase
+        .from(userTable)
+        .stream(primaryKey: ['userName'])
+        .eq('userName', userName);
   }
 
 
 
-  Future<void> insertData<T extends Map<String, dynamic>>({required String tableName, required T data,required BuildContext context}) async {
+
+
+  static Future<void> insertData<T extends Map<String, dynamic>>({required String tableName, required T data,required BuildContext context}) async {
     try {
       await supaBase.from(tableName).insert(data).select().timeout(const Duration(seconds: 10));
     } catch (e) {
-      throw ExceptionHandler.handle(e,context);
+       ExceptionHandler.handle(e,context);
     }
   }
 
 
 
-  Future<void> updateData<T>({required String tableName,required Map<String, dynamic> updatedData,required String column,required dynamic value,required BuildContext context}) async {
+  static Future<void> updateData<T>({required String tableName,required Map<String, dynamic> updatedData,required String column,required dynamic value,required BuildContext context}) async {
     try {
       await supaBase.from(tableName).update(updatedData).eq(column, value).select().timeout(const Duration(seconds: 10));
     } catch (e) {
-      throw ExceptionHandler.handle(e,context);
+       ExceptionHandler.handle(e,context);
     }
   }
 
 
 
-  Future<void> deleteData({required String tableName,required String column,required dynamic value,required BuildContext context}) async {
+  static Future<void> deleteData({required String tableName,required String column,required dynamic value,required BuildContext context}) async {
     try {
       await supaBase.from(tableName).delete().eq(column, value).select().timeout(const Duration(seconds: 10));
     } catch (e) {
-      throw ExceptionHandler.handle(e,context);
+       ExceptionHandler.handle(e,context);
     }
   }
 

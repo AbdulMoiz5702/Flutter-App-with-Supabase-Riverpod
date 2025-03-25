@@ -15,13 +15,13 @@ import '../../widgets/custom_loading.dart';
 class VerifyOtp extends ConsumerWidget {
   final String email;
   final OtpType otpType ;
-  final bool isLogin;
-  const VerifyOtp({super.key,required this.email,required this.otpType,required this.isLogin});
+  const VerifyOtp({super.key,required this.email,required this.otpType});
 
   @override
   Widget build(BuildContext context,WidgetRef ref) {
     var data = ref.watch(otpProvider.notifier);
     var key = GlobalKey<FormState>();
+    print('emial $email and otpType $otpType');
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -59,7 +59,8 @@ class VerifyOtp extends ConsumerWidget {
               Consumer(
                   builder: (context,reference,_){
                     var data = reference.watch(otpProvider.select((state)=> state.isLoading));
-                    return data == true ? const CustomLoading() : CustomButton(title:isLogin == true ? 'Login' :'Signup', onTap: (){
+                    var ref = reference.watch(otpProvider.notifier).getTitle(otpType);
+                    return data == true ? const CustomLoading() : CustomButton(title:ref, onTap: (){
                       if(key.currentState!.validate()){
                         reference.read(otpProvider.notifier).confirmOtp(email: email, context: context,otpType:otpType,);
                       }
@@ -73,19 +74,20 @@ class VerifyOtp extends ConsumerWidget {
                   const Sized(width: 0.02,),
                   Consumer(
                     builder: (context, reference, _) {
-                      var data = reference.watch(otpProvider);
-                      return data.secondsRemaining > 0
-                          ? Text("Resend in ${data.secondsRemaining}s")  // Show countdown
-                          : data.resendLoading == true ? const CustomLoading() :InkWell(
-                        onTap: () {
+                      var data = reference.watch(otpProvider.select((state)=> state.secondsRemaining));
+                      var loading = reference.watch(otpProvider.select((state)=> state.resendLoading));
+                      return data > 0
+                          ? smallText(title :"Resend in ${data}s")  // Show countdown
+                          : loading == true ? const CustomLoading() :InkWell(
+                          onTap: () {
+                          print('email_OTP $email');
+                          print('otpType $otpType');
                           reference.read(otpProvider.notifier).resendOtp(email: email, context: context,otpType: otpType);
                         },
                         child: mediumText(title: 'Resend'),
                       );
                     },
                   ),
-
-
                 ],
               )
             ],

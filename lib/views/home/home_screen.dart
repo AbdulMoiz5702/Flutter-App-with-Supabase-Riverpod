@@ -22,7 +22,7 @@ class HomeScreen extends StatelessWidget {
               builder: (context,reference,_){
                 var data = reference.watch(linkIdentityProvider.select((state)=> state.isLoading));
                 return data == true ? const CustomLoading() : CustomButton(title: 'Google', onTap: (){
-                  reference.read(linkIdentityProvider.notifier).signInWithGoogle();
+                  reference.read(linkIdentityProvider.notifier).signInWithGoogle(context: context);
                 });
               }),
         ],

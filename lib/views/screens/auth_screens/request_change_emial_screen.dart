@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../providers/auth_provider/login_provider.dart';
+import 'package:ripverpod_supabase/providers/auth_provider/password_reset_provider.dart';
 import '../../../utils/format_validator.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_loading.dart';
 import '../../widgets/custom_sizedBox.dart';
 import '../../widgets/custom_textfeild.dart';
-import '../../widgets/text_widgets.dart';
 
 
 
-class ForgotPassword extends ConsumerWidget {
-  const ForgotPassword({super.key});
+
+class RequestChangeEmail extends ConsumerWidget {
+  const RequestChangeEmail({super.key});
 
   @override
   Widget build(BuildContext context,WidgetRef ref) {
-    var provider = ref.watch(loginProvider.notifier);
+    var provider = ref.watch(resetProvider.notifier);
     var key = GlobalKey<FormState>();
     return Scaffold(
       appBar: AppBar(
@@ -29,29 +29,18 @@ class ForgotPassword extends ConsumerWidget {
           child: Column(
             children: [
               const Sized(height: 0.05,),
-              CustomTextField(controller: provider.emailController, hintText: 'Email', validate: (value){
+              CustomTextField(controller: provider.updateEmailController, hintText: 'Email', validate: (value){
                 return  FormValidators.validateEmail(value);
               }),
               const Sized(height: 0.05,),
               Consumer(
                   builder: (context,reference,_){
-                    var data = reference.watch(loginProvider.select((state)=> state.forgotLoading));
-                    return data == true ? const CustomLoading() : CustomButton(title: 'Send Email', onTap: (){
+                    var data = reference.watch(resetProvider.select((state)=> state.isChangeEmail));
+                    return data == true ? const CustomLoading() : CustomButton(title: 'Send OTP', onTap: (){
                       if(key.currentState!.validate()){
-                        reference.read(loginProvider.notifier).forgotPassword(context: context);
+                        reference.read(resetProvider.notifier).updateEmail(context: context);
                       }
                     });
-                  }),
-              const Sized(height: 0.05,),
-              Consumer(
-                  builder: (context,reference,_){
-                    var data = reference.watch(loginProvider.select((state)=> state.otpLoading));
-                    return data == true ? const CustomLoading() : GestureDetector(
-                      onTap: () {
-                        provider.loginWithOtp(context: context);
-                      },
-                      child: smallText(title: 'Login with OTP'),
-                    );
                   }),
             ],
           ),

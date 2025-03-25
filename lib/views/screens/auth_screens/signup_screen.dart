@@ -8,6 +8,7 @@ import 'package:ripverpod_supabase/views/widgets/custom_button.dart';
 import 'package:ripverpod_supabase/views/widgets/custom_loading.dart';
 import 'package:ripverpod_supabase/views/widgets/custom_sizedBox.dart';
 import 'package:ripverpod_supabase/views/widgets/custom_textfeild.dart';
+import '../../../services/supaBase_services.dart';
 import '../../widgets/text_widgets.dart';
 import '../widgets/buildStrength.dart';
 import '../widgets/valadation_item.dart';
@@ -20,7 +21,6 @@ class SignupScreen extends ConsumerWidget {
   Widget build(BuildContext context,WidgetRef ref) {
     var provider = ref.watch(signupProvider.notifier);
     var key = GlobalKey<FormState>();
-    print('build');
     return Scaffold(
       appBar: AppBar(),
       body: SingleChildScrollView(
@@ -31,17 +31,28 @@ class SignupScreen extends ConsumerWidget {
             child: Column(
               children: [
                 const Sized(height: 0.05,),
-                CustomTextField(controller: provider.nameController, hintText: 'Username', validate: (value){
-                  return  value.isEmpty ? 'Username required' : null;
+                CustomTextField(controller: provider.nameController, hintText: 'Name', validate: (value){
+                  return  value.isEmpty ? 'Name required' : null;
                 }),
                 const Sized(height: 0.02,),
                 CustomTextField(controller: provider.emailController, hintText: 'Email', validate: (value){
                   return  FormValidators.validateEmail(value);
                 }),
                 const Sized(height: 0.02,),
-                CustomTextField(controller: provider.phoneController, hintText: 'Phone', validate: (value){
-                  return  FormValidators.validatePhone(value);
-                }),
+                Consumer(
+                  builder: (context, ref, child) {
+                    var provider = ref.watch(signupProvider.notifier);
+                    var checkUserName = ref.watch(signupProvider.select((state)=> state.checkUserName));
+                    return CustomTextField(
+                      controller: provider.userNameController,
+                      hintText: 'Username',
+                      onChanged: (value) => provider.checkUserNameAvailability(context: context),
+                      validate: (value) {
+                        return FormValidators.validateUserName(value, checkUserName);
+                      },
+                    );
+                  },
+                ),
                 const Sized(height: 0.02,),
                 CustomTextField(
                     controller: provider.passwordController, hintText: 'Password',
